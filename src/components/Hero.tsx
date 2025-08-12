@@ -4,6 +4,8 @@
  import { Mail, Linkedin, ChevronDown, Github } from 'lucide-react';
 -import profileImg from '../assets/profile.png';
 
+  console.log('Hero component rendering');
+
  const Hero = () => {
  }
 @@ .. @@
