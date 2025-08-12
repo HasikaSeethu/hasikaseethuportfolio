@@ -5,6 +5,7 @@
 -import profileImg from '../assets/profile.png';
 
  const Hero = () => {
+ }
 @@ .. @@
                
 -            <img
