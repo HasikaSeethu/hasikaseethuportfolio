@@ -20,3 +20,5 @@
 +            </div>
              </div>
            </motion.div>
+
+export default Hero
