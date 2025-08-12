@@ -6,12 +6,14 @@ import { Mail, Linkedin, Send } from 'lucide-react';
 
 const Contact = () => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, threshold: 0.1 });
+  const isInView = useInView(ref, { once: true });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -22,16 +24,38 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    // Reset form
-    setFormData({ name: '', email: '', message: '' });
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    // Create mailto link with form data
+    const subject = `Portfolio Contact from ${formData.name}`;
+    const body = `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`;
+    const mailtoLink = `mailto:hasikaseethu@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    try {
+      // Open default email client
+      window.location.href = mailtoLink;
+      
+      // Reset form
+      setFormData({ name: '', email: '', message: '' });
+      setSubmitStatus('success');
+      
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setSubmitStatus('idle');
+      }, 3000);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <section id="contact" className="py-20 bg-gradient-to-b from-[#0A1A2F] to-[#0E2342] relative overflow-hidden">
       {/* Background Tech Elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-gradient-to-r from-[#00E0FF] to-[#19F5C4] rounded-full filter blur-3xl opacity-10"></div>
         <div className="absolute bottom-20 left-1/4 w-72 h-72 bg-gradient-to-r from-[#19F5C4] to-[#00E0FF] rounded-full filter blur-3xl opacity-15"></div>
         
@@ -41,7 +65,7 @@ const Contact = () => {
         <div className="absolute bottom-1/3 left-1/3 w-2 h-2 bg-[#00E0FF] rounded-full animate-bounce delay-1100"></div>
       </div>
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 50 }}
@@ -110,8 +134,9 @@ const Contact = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
             transition={{ duration: 0.8, delay: 0.4 }}
+            className="relative z-20"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 bg-[#0A1A2F]/50 backdrop-blur-sm p-6 rounded-xl border border-[#00E0FF]/20">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                   Name
@@ -123,8 +148,9 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-[#0A1A2F] border border-[#00E0FF]/30 text-white rounded-lg focus:ring-2 focus:ring-[#00E0FF] focus:border-[#00E0FF] transition-all duration-300 placeholder-gray-400"
+                  className="w-full px-4 py-3 bg-[#0A1A2F] border border-[#00E0FF]/30 text-white rounded-lg focus:ring-2 focus:ring-[#00E0FF] focus:border-[#00E0FF] transition-all duration-300 placeholder-gray-400 focus:outline-none"
                   placeholder="Your name"
+                  style={{ pointerEvents: 'auto' }}
                 />
               </div>
 
@@ -139,8 +165,9 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-[#0A1A2F] border border-[#00E0FF]/30 text-white rounded-lg focus:ring-2 focus:ring-[#00E0FF] focus:border-[#00E0FF] transition-all duration-300 placeholder-gray-400"
+                  className="w-full px-4 py-3 bg-[#0A1A2F] border border-[#00E0FF]/30 text-white rounded-lg focus:ring-2 focus:ring-[#00E0FF] focus:border-[#00E0FF] transition-all duration-300 placeholder-gray-400 focus:outline-none"
                   placeholder="your.email@example.com"
+                  style={{ pointerEvents: 'auto' }}
                 />
               </div>
 
@@ -155,19 +182,37 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   rows={5}
-                  className="w-full px-4 py-3 bg-[#0A1A2F] border border-[#00E0FF]/30 text-white rounded-lg focus:ring-2 focus:ring-[#00E0FF] focus:border-[#00E0FF] transition-all duration-300 resize-none placeholder-gray-400"
+                  className="w-full px-4 py-3 bg-[#0A1A2F] border border-[#00E0FF]/30 text-white rounded-lg focus:ring-2 focus:ring-[#00E0FF] focus:border-[#00E0FF] transition-all duration-300 resize-none placeholder-gray-400 focus:outline-none"
                   placeholder="Tell me about your project..."
+                  style={{ pointerEvents: 'auto' }}
                 />
               </div>
 
+              {/* Status Messages */}
+              {submitStatus === 'success' && (
+                <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 text-sm">
+                  ✅ Email client opened! Please send the email to complete your message.
+                </div>
+              )}
+              
+              {submitStatus === 'error' && (
+                <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
+                  ❌ Error opening email client. Please try again or email directly at hasikaseethu@gmail.com
+                </div>
+              )}
+
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full bg-gradient-to-r from-[#00E0FF] to-[#19F5C4] hover:from-[#19F5C4] hover:to-[#00E0FF] text-[#0A1A2F] py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-2xl hover:shadow-[#00E0FF]/25"
+                disabled={isSubmitting}
+                whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
+                whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
+                className={`w-full bg-gradient-to-r from-[#00E0FF] to-[#19F5C4] hover:from-[#19F5C4] hover:to-[#00E0FF] text-[#0A1A2F] py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-2xl hover:shadow-[#00E0FF]/25 cursor-pointer ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                style={{ pointerEvents: 'auto' }}
               >
                 <Send className="w-5 h-5" />
-                Send Message
+                {isSubmitting ? 'Opening Email...' : 'Send Message'}
               </motion.button>
             </form>
           </motion.div>
